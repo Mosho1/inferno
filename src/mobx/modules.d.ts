@@ -4,6 +4,7 @@ declare module 'inferno-component' {
 		context?: C;
 		constructor (props?: P, context?: C);
 		componentWillReceiveProps? (nextProps: P, nextContext: C): void;
+		shouldComponentUpdate? (nextProps: P, nextContext: C): boolean;
 		forceUpdate (): void;
 		isPrototypeOf (v: Object): boolean;
 	}
@@ -14,13 +15,8 @@ declare module 'inferno-dom' {
 	export function findDOMNode(node: any): any
 }
 
-declare module 'inferno-create-class' {
-	function createClass(component: any): any
-	export = createClass;
-}
-
 declare module 'inferno-create-element' {
-	function createElement(component: any, props: any, children: any): any
+	function createElement(component: any, props: any, children?: any): any
 	export = createElement;
 }
 

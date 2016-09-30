@@ -1,41 +1,8 @@
 import hoistStatics from 'hoist-non-inferno-statics';
 import createElement from 'inferno-create-element';
-import createClass from 'inferno-create-class';
 
 interface IProps {
 	ref: any;
-}
-
-/**
- * Store Injection
- */
-function createStoreInjector (grabStoresFn, component) {
-	const Injector: any = createClass({
-		displayName: 'MobXStoreInjector',
-		render() {
-			const newProps = <IProps> {};
-			for (let key in this.props) {
-				if (this.props.hasOwnProperty(key)) {
-					newProps[key] = this.props[key];
-				}
-			}
-			const additionalProps = grabStoresFn(this.context.mobxStores || {}, newProps, this.context) || {};
-			for ( let key in additionalProps ) {
-				newProps[ key ] = additionalProps[ key ];
-			}
-			newProps.ref = instance => {
-				this.wrappedInstance = instance;
-			};
-
-			return createElement(component, newProps, this.props.children);
-		}
-	});
-
-	Injector.contextTypes = { mobxStores() {} };
-	Injector.wrappedComponent = component;
-	hoistStatics(Injector, component);
-
-	return Injector;
 }
 
 const grabStoresByName = (storeNames) => (baseStores, nextProps) => {
@@ -76,7 +43,27 @@ function inject (grabStoresFn): any {
 		grabStoresFn = grabStoresByName(storesNames);
 	}
 
-	return componentClass => createStoreInjector(grabStoresFn, componentClass);
+	return (componentClass) => {
+		function MobxWrapper(props, context) {
+
+			const newProps = <IProps> {};
+			for (let key in props) {
+				if (props.hasOwnProperty(key)) {
+					newProps[key] = props[key];
+				}
+			}
+
+			const additionalProps = grabStoresFn(context.mobxStores || {}, newProps, context) || {};
+			for ( let key in additionalProps ) {
+				newProps[ key ] = additionalProps[ key ];
+			}
+
+			return createElement(componentClass, newProps);
+		}
+
+		hoistStatics(MobxWrapper, componentClass);
+		return MobxWrapper;
+	};
 }
 
 export default inject;

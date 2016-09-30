@@ -75,12 +75,7 @@ export default {
 					if (typeof this.componentWillReact === 'function') {
 						this.componentWillReact(); // TODO: wrap in action?
 					}
-					if (this.__$mobxIsUnmounted !== true) {
-						// If we are unmounted at this point, componentWillReact() had a side effect causing the component to unmounted
-						// TODO: remove this check? Then Inferno will properly warn about the fact that this should not happen? See #73
-						// However, people also claim this migth happen during unit tests..
-						Component.prototype.forceUpdate.call(this);
-					}
+					Component.prototype.forceUpdate.call(this);
 				}
 			});
 			reactiveRender.$mobx = reaction;
@@ -93,7 +88,7 @@ export default {
 
 	componentWillUnmount() {
 		this.render.$mobx && this.render.$mobx.dispose();
-		this.__$mobxIsUnmounted = true;
+
 		if (isDevtoolsEnabled) {
 			const node = InfernoDOM.findDOMNode(this);
 			if (node && componentByNodeRegistery) {

@@ -1,8 +1,7 @@
 import invariant from 'invariant';
-import Component from 'inferno-component';
-import createClass from 'inferno-create-class';
 import reactiveMixin from './reactiveMixin';
 import inject from './inject';
+import { Component } from "inferno-component";
 
 const lifecycleMethods = [
 	'componentWillMount',
@@ -29,28 +28,9 @@ function connect (arg1: string | any, arg2 = null): any {
 	}
 	const componentClass = arg1;
 
-	// Stateless function component:
-	// If it is function but doesn't seem to be a Inferno class constructor,
-	// wrap it to a Inferno class automatically
-	if (typeof componentClass === 'function'
-		&& (!componentClass.prototype || !componentClass.prototype.render)
-		&& !componentClass.isReactClass
-		&& !Component.isPrototypeOf(componentClass)
-	) {
-		const newClass = createClass({
-			displayName: componentClass.displayName || componentClass.name,
-			propTypes: componentClass.propTypes,
-			contextTypes: componentClass.contextTypes,
-			getDefaultProps: () => componentClass.defaultProps,
-			render: () => componentClass.call(this, this.props, this.context)
-		});
-
-		return connect(newClass);
-	}
-
 	invariant(componentClass, 'Please pass a valid component to "observer"');
 
-	const target = componentClass.prototype || componentClass;
+	const target: Component = componentClass.prototype || componentClass;
 
 	lifecycleMethods.forEach(funcName => patch(target, funcName));
 
@@ -58,7 +38,6 @@ function connect (arg1: string | any, arg2 = null): any {
 		target.shouldComponentUpdate = reactiveMixin.shouldComponentUpdate;
 	}
 
-	componentClass.isMobXReactObserver = true;
 	return componentClass;
 }
 
